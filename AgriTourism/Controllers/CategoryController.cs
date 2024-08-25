@@ -1,22 +1,39 @@
 ﻿using AgriTourism.Data;
 using AgriTourism.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace AgriTourism.Controllers
 {
     public class CategoryController : Controller
     {
-
-
-        // fetch Data From Database
         private readonly ApplicationDbContext _db;
+
         public CategoryController(ApplicationDbContext db)
         {
             _db = db;
         }
-        public IActionResult Index()
+
+        public IActionResult Index(string searchString)
         {
-            List<Category> objCategoryList = _db.Categories.ToList();
+            List<Category> objCategoryList;
+
+            if (string.IsNullOrEmpty(searchString))
+            {
+                objCategoryList = _db.Categories.ToList();
+            }
+            else
+            {
+                objCategoryList = _db.Categories
+                    .Where(c => c.Name.Contains(searchString) || c.DisplayOrder.ToString().Contains(searchString))
+                    .ToList();
+
+                if (!objCategoryList.Any())
+                {
+                    TempData["warning"] = "No categories found matching your search criteria.";
+                }
+            }
+
             return View(objCategoryList);
         }
 
@@ -24,6 +41,7 @@ namespace AgriTourism.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public IActionResult Create(Category obj)
         {
@@ -40,12 +58,7 @@ namespace AgriTourism.Controllers
                 return RedirectToAction("Index");
             }
             return View();
-
         }
-
-
-
-
 
         public IActionResult Edit(int? id)
         {
@@ -54,8 +67,6 @@ namespace AgriTourism.Controllers
                 return NotFound();
             }
             Category? categoryFromDb = _db.Categories.Find(id);
-            //Category? categoryFromDb1 = _db.Categories.FirstOrDefault(u=>u.Id==id);
-            //Category? categoryFromDb2 = _db.Categories.Where(u=>u.Id==id).FirstOrDefault();
 
             if (categoryFromDb == null)
             {
@@ -63,6 +74,7 @@ namespace AgriTourism.Controllers
             }
             return View(categoryFromDb);
         }
+
         [HttpPost]
         public IActionResult Edit(Category obj)
         {
@@ -74,7 +86,6 @@ namespace AgriTourism.Controllers
                 return RedirectToAction("Index");
             }
             return View();
-
         }
 
         public IActionResult Delete(int? id)
@@ -84,8 +95,6 @@ namespace AgriTourism.Controllers
                 return NotFound();
             }
             Category? categoryFromDb = _db.Categories.Find(id);
-            //Category? categoryFromDb1 = _db.Categories.FirstOrDefault(u=>u.Id==id);
-            //Category? categoryFromDb2 = _db.Categories.Where(u=>u.Id==id).FirstOrDefault();
 
             if (categoryFromDb == null)
             {
@@ -93,6 +102,7 @@ namespace AgriTourism.Controllers
             }
             return View(categoryFromDb);
         }
+
         [HttpPost, ActionName("Delete")]
         public IActionResult DeletePOST(int? id)
         {
@@ -106,13 +116,5 @@ namespace AgriTourism.Controllers
             TempData["success"] = "Category Deleted Successfully";
             return RedirectToAction("Index");
         }
-
-
-
-
-
-
-
-
     }
 }
