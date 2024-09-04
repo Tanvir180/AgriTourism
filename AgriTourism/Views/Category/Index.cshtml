@@ -1,6 +1,5 @@
 ﻿@model List<Category>
 
-
 <div class="container my-4">
     <div class="row">
         <div class="col-6">
@@ -18,6 +17,7 @@
             <form asp-controller="Category" asp-action="Index" method="get" class="input-group mb-3">
                 <input type="text" name="searchString" class="form-control" placeholder="Search by name or display order" value="@ViewData["searchString"]">
                 <button class="btn btn-primary" type="submit">Search</button>
+                <a asp-controller="Category" asp-action="Index" class="btn btn-secondary ms-2">Show All</a>
             </form>
         </div>
     </div>
